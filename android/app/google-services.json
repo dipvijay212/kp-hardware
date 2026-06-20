@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "622596799561",
+    "project_id": "kp-hardware-fe976",
+    "storage_bucket": "kp-hardware-fe976.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:622596799561:android:68535befd2754d588c5398",
+        "android_client_info": {
+          "package_name": "com.kphardwarecatalog"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHvFyxWknRoJGAeb6SS0SQ-2mttNOEaDM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
