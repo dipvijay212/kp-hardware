@@ -1,23 +1,14 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Product, CartItem } from '../types';
 
-interface CartContextType {
-  cartItems: CartItem[];
-  addToCart: (product: Product, quantity: number) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
-  clearCart: () => void;
-  totalItems: number;
-  totalPrice: number;
-}
-
-const CartContext = createContext<CartContextType | undefined>(undefined);
+const CartContext = createContext();
 
 const CART_STORAGE_KEY = '@kp_hardware_catalog_cart';
+const MAX_QTY = 999;
+const MIN_QTY = 1;
 
-export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+export const CartProvider = ({ children }) => {
+  const [cartItems, setCartItems] = useState([]);
 
   // Load cart from AsyncStorage on mount
   useEffect(() => {
@@ -34,8 +25,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     loadCart();
   }, []);
 
-  // Save cart to AsyncStorage whenever cartItems change
-  const saveCart = async (items: CartItem[]) => {
+  // Save cart to AsyncStorage
+  const saveCart = async (items) => {
     try {
       await AsyncStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
     } catch (error) {
@@ -43,21 +34,21 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const addToCart = (product: Product, quantity: number) => {
+  // Add Product to Cart
+  const addToCart = (product, quantity = 1) => {
     setCartItems((prevItems) => {
       const existingItemIndex = prevItems.findIndex((item) => item.product.id === product.id);
       let newItems = [...prevItems];
 
       if (existingItemIndex > -1) {
-        // Update quantity (capping at product stock if needed, though product details screen handles bounds)
-        const newQty = prevItems[existingItemIndex].quantity + quantity;
-        const finalQty = Math.min(newQty, product.stock);
+        const currentQty = prevItems[existingItemIndex].quantity;
+        const targetQty = Math.min(currentQty + quantity, MAX_QTY);
         newItems[existingItemIndex] = {
           ...prevItems[existingItemIndex],
-          quantity: finalQty,
+          quantity: targetQty,
         };
       } else {
-        newItems.push({ product, quantity: Math.min(quantity, product.stock) });
+        newItems.push({ product, quantity: Math.min(quantity, MAX_QTY) });
       }
 
       saveCart(newItems);
@@ -65,7 +56,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
-  const removeFromCart = (productId: string) => {
+  // Remove Product from Cart
+  const removeFromCart = (productId) => {
     setCartItems((prevItems) => {
       const newItems = prevItems.filter((item) => item.product.id !== productId);
       saveCart(newItems);
@@ -73,18 +65,17 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  // Increase Quantity by 1
+  const increaseQuantity = (productId) => {
     setCartItems((prevItems) => {
-      const existingItemIndex = prevItems.findIndex((item) => item.product.id === productId);
-      if (existingItemIndex === -1) return prevItems;
+      const idx = prevItems.findIndex((item) => item.product.id === productId);
+      if (idx === -1) return prevItems;
 
       let newItems = [...prevItems];
-      const product = newItems[existingItemIndex].product;
-      const targetQty = Math.max(1, Math.min(quantity, product.stock));
-      
-      newItems[existingItemIndex] = {
-        ...newItems[existingItemIndex],
-        quantity: targetQty,
+      const newQty = Math.min(prevItems[idx].quantity + 1, MAX_QTY);
+      newItems[idx] = {
+        ...newItems[idx],
+        quantity: newQty,
       };
 
       saveCart(newItems);
@@ -92,6 +83,25 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
+  // Decrease Quantity by 1
+  const decreaseQuantity = (productId) => {
+    setCartItems((prevItems) => {
+      const idx = prevItems.findIndex((item) => item.product.id === productId);
+      if (idx === -1) return prevItems;
+
+      let newItems = [...prevItems];
+      const newQty = Math.max(prevItems[idx].quantity - 1, MIN_QTY);
+      newItems[idx] = {
+        ...newItems[idx],
+        quantity: newQty,
+      };
+
+      saveCart(newItems);
+      return newItems;
+    });
+  };
+
+  // Clear Cart
   const clearCart = () => {
     setCartItems([]);
     AsyncStorage.removeItem(CART_STORAGE_KEY).catch((err) =>
@@ -99,7 +109,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     );
   };
 
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  // Computed values
+  const totalItems = cartItems.length; // Number of unique products
+  const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0); // Total quantity sum
   const totalPrice = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
   return (
@@ -108,9 +120,11 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         cartItems,
         addToCart,
         removeFromCart,
-        updateQuantity,
+        increaseQuantity,
+        decreaseQuantity,
         clearCart,
         totalItems,
+        totalQuantity,
         totalPrice,
       }}
     >
@@ -126,3 +140,5 @@ export const useCart = () => {
   }
   return context;
 };
+
+export default CartContext;

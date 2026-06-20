@@ -9,23 +9,33 @@ import {
   Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, NavigationProp, useIsFocused } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../components/Header';
 import CartItemComponent from '../components/CartItem';
 import { COLORS, SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../theme/theme';
 import { useCart } from '../context/CartContext';
-import { CartItem } from '../types';
 
-export const CartScreen: React.FC = () => {
-  const navigation = useNavigation<NavigationProp<any>>();
+export const CartScreen = () => {
+  const navigation = useNavigation();
   const isFocused = useIsFocused();
-  const { cartItems, updateQuantity, removeFromCart, totalPrice, totalItems, clearCart } = useCart();
+  
+  // Use the context functions (increaseQuantity and decreaseQuantity)
+  const { 
+    cartItems, 
+    increaseQuantity, 
+    decreaseQuantity, 
+    removeFromCart, 
+    totalPrice, 
+    totalItems, 
+    totalQuantity, 
+    clearCart 
+  } = useCart();
 
-  const [buyerProfile, setBuyerProfile] = useState<any>(null);
+  const [buyerProfile, setBuyerProfile] = useState(null);
 
-  // Load registered buyer details whenever screen comes into focus
+  // Load buyer profile whenever CartScreen comes into focus
   useEffect(() => {
     const loadBuyerProfile = async () => {
       try {
@@ -52,10 +62,8 @@ export const CartScreen: React.FC = () => {
     }
 
     if (buyerProfile) {
-      // Proceed to order checkout summary screen
       navigation.navigate('OrderRequest');
     } else {
-      // Buyer needs registration first. Prompt and redirect
       Alert.alert(
         'Registration Required',
         'You need to register your business details to request wholesale orders.',
@@ -73,10 +81,18 @@ export const CartScreen: React.FC = () => {
     }
   };
 
-  const renderItem = ({ item }: { item: CartItem }) => (
+  const renderItem = ({ item }) => (
     <CartItemComponent 
       item={item} 
-      onUpdateQuantity={updateQuantity} 
+      onUpdateQuantity={(id, qty) => {
+        // Map quantity modifications to context handlers
+        const diff = qty - item.quantity;
+        if (diff > 0) {
+          increaseQuantity(id);
+        } else if (diff < 0) {
+          decreaseQuantity(id);
+        }
+      }} 
       onRemove={removeFromCart} 
     />
   );
@@ -98,7 +114,6 @@ export const CartScreen: React.FC = () => {
 
     return (
       <View style={styles.footerContainer}>
-        {/* Buyer info reference label if registered */}
         {buyerProfile && (
           <View style={styles.buyerInfoBadge}>
             <Icon name="business" size={16} color={COLORS.primary} />
@@ -108,16 +123,16 @@ export const CartScreen: React.FC = () => {
           </View>
         )}
 
-        {/* Pricing Summary */}
+        {/* Wholesale pricing and quantity summary details */}
         <View style={[styles.summaryCard, SHADOWS.subtle]}>
           <Text style={styles.summaryTitle}>Wholesale Order Estimation</Text>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Total Product Categories</Text>
-            <Text style={styles.summaryValue}>{cartItems.length}</Text>
+            <Text style={styles.summaryLabel}>Total Products (Unique)</Text>
+            <Text style={styles.summaryValue}>{totalItems}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Total Quantity units</Text>
-            <Text style={styles.summaryValue}>{totalItems}</Text>
+            <Text style={styles.summaryLabel}>Total Quantity (Units)</Text>
+            <Text style={styles.summaryValue}>{totalQuantity}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.summaryRow}>
@@ -126,7 +141,6 @@ export const CartScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Checkout Trigger */}
         <TouchableOpacity 
           style={[styles.checkoutButton, SHADOWS.medium]}
           onPress={handleCheckout}
@@ -145,16 +159,16 @@ export const CartScreen: React.FC = () => {
         <View style={styles.emptyIconCircle}>
           <Icon name="cart-outline" size={54} color={COLORS.primary} />
         </View>
-        <Text style={styles.emptyTitle}>Wholesale Cart is Empty</Text>
+        <Text style={styles.emptyTitle}>Your Cart Is Empty</Text>
         <Text style={styles.emptySubtitle}>
-          Explore the catalog and select bulk quantity quantities to request a wholesale quotation.
+          Explore the catalog and select bulk quantities to request a wholesale quotation.
         </Text>
         <TouchableOpacity 
           style={styles.shopButton}
           onPress={() => navigation.navigate('Home')}
           activeOpacity={0.8}
         >
-          <Text style={styles.shopButtonText}>Browse Products</Text>
+          <Text style={styles.shopButtonText}>Continue Shopping</Text>
         </TouchableOpacity>
       </View>
     );

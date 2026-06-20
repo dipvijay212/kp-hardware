@@ -18,6 +18,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../theme/theme';
+import { useCart } from '../context/CartContext';
 
 const { width } = Dimensions.get('window');
 
@@ -29,11 +30,20 @@ export const ProductDetailsScreen = () => {
   const navigation = useNavigation();
   const { product } = route.params;
   const [imageError, setImageError] = useState(false);
+  
+  // Cart Actions Integration
+  const { addToCart } = useCart();
 
   // Fallback high quality placeholder image if Cloudinary/Firebase URL fails
   const imageUri = imageError || !product.image
     ? 'https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=600'
     : product.image;
+
+  // Add to Cart Action
+  const handleAddToCart = () => {
+    addToCart(product, 1);
+    Alert.alert('Added to Cart', `${product.name} has been added to your wholesale cart successfully.`);
+  };
 
   // 1. Call Dealer Handler
   const handleCall = () => {
@@ -163,34 +173,46 @@ export const ProductDetailsScreen = () => {
           </View>
         </ScrollView>
 
-        {/* Sticky Bottom Action Buttons Row */}
+        {/* Sticky Bottom Action Buttons */}
         <View style={styles.stickyFooter}>
-          {/* Share Button (Modern circular icon layout next to main action buttons) */}
+          {/* Row 1: Add to Cart Button (Primary wholesale flow) */}
           <TouchableOpacity 
-            style={styles.shareBtn} 
-            onPress={handleShare}
-            activeOpacity={0.8}
-          >
-            <Icon name="share-social" size={22} color={COLORS.primary} />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.actionBtn, styles.callBtn]} 
-            onPress={handleCall}
+            style={styles.addToCartBtn} 
+            onPress={handleAddToCart}
             activeOpacity={0.85}
           >
-            <Icon name="call" size={18} color={COLORS.white} style={styles.btnIcon} />
-            <Text style={styles.btnText}>Call Dealer</Text>
+            <Icon name="cart-outline" size={20} color={COLORS.white} style={styles.btnIcon} />
+            <Text style={styles.addToCartText}>Add To Cart</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.actionBtn, styles.whatsappBtn]} 
-            onPress={handleWhatsApp}
-            activeOpacity={0.85}
-          >
-            <Icon name="logo-whatsapp" size={20} color={COLORS.white} style={styles.btnIcon} />
-            <Text style={styles.btnText}>WhatsApp Inquiry</Text>
-          </TouchableOpacity>
+          {/* Row 2: Secondary buttons */}
+          <View style={styles.secondaryActionsRow}>
+            <TouchableOpacity 
+              style={styles.shareBtn} 
+              onPress={handleShare}
+              activeOpacity={0.8}
+            >
+              <Icon name="share-social" size={22} color={COLORS.primary} />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.actionBtn, styles.callBtn]} 
+              onPress={handleCall}
+              activeOpacity={0.85}
+            >
+              <Icon name="call" size={18} color={COLORS.white} style={styles.btnIcon} />
+              <Text style={styles.btnText}>Call Dealer</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.actionBtn, styles.whatsappBtn]} 
+              onPress={handleWhatsApp}
+              activeOpacity={0.85}
+            >
+              <Icon name="logo-whatsapp" size={20} color={COLORS.white} style={styles.btnIcon} />
+              <Text style={styles.btnText}>WhatsApp</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </SafeAreaView>
@@ -207,7 +229,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   scrollContent: {
-    paddingBottom: 110, // Extra space at bottom to scroll past the sticky footer
+    paddingBottom: 155, // Extra space at bottom to scroll past the double-row sticky footer
   },
   imageContainer: {
     width: width,
@@ -345,9 +367,8 @@ const styles = StyleSheet.create({
     borderTopColor: COLORS.border,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: 'column',
+    alignItems: 'stretch',
     // Soft shadow for sticky float
     ...Platform.select({
       ios: {
@@ -361,9 +382,29 @@ const styles = StyleSheet.create({
       },
     }),
   },
+  addToCartBtn: {
+    backgroundColor: COLORS.primary, // Navy Blue
+    height: 46,
+    borderRadius: BORDER_RADIUS.md,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.xs + 2,
+    ...SHADOWS.subtle,
+  },
+  addToCartText: {
+    color: COLORS.white,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    fontSize: 14,
+  },
+  secondaryActionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   shareBtn: {
-    width: 48,
-    height: 48,
+    width: 46,
+    height: 44,
     borderRadius: BORDER_RADIUS.md, // Rounded buttons matching theme
     backgroundColor: COLORS.secondary,
     borderWidth: 1,
@@ -374,7 +415,7 @@ const styles = StyleSheet.create({
   },
   actionBtn: {
     flex: 1,
-    height: 48,
+    height: 44,
     borderRadius: BORDER_RADIUS.md,
     flexDirection: 'row',
     justifyContent: 'center',
@@ -386,7 +427,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary, // Navy Blue (#0A1E6A)
   },
   whatsappBtn: {
-    flex: 1.25, // Give slightly more space to WhatsApp text
+    flex: 1.1, // Give slightly more space to WhatsApp text
     backgroundColor: COLORS.accent, // Vibrant Green Accent (#00C853)
   },
   btnIcon: {
