@@ -23,7 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   style
 }) => {
   const navigation = useNavigation<NavigationProp<any>>();
-  const { totalItems } = useCart();
+  const { totalQuantity } = useCart();
 
   return (
     <View style={[styles.container, SHADOWS.subtle, style]}>
@@ -80,10 +80,10 @@ export const Header: React.FC<HeaderProps> = ({
           activeOpacity={0.7}
         >
           <Icon name="cart-outline" size={26} color={COLORS.primary} />
-          {totalItems > 0 && (
+          {totalQuantity > 0 && (
             <View style={styles.badgeContainer}>
               <Text style={styles.badgeText}>
-                {totalItems > 99 ? '99+' : totalItems}
+                {totalQuantity > 99 ? '99+' : totalQuantity}
               </Text>
             </View>
           )}

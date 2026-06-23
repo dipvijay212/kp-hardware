@@ -88,33 +88,31 @@ export const ProductCard = ({ product }) => {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.white,
-    borderRadius: BORDER_RADIUS.lg, // 16px
-    overflow: 'hidden',
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: '#F3F4F6',
     flex: 1,
-    margin: SPACING.xs,
-    height: 330, // Proportional height to contain all data elegantly
-    // Soft shadow effect
+    marginBottom: 16, // Use only bottom margin for grid spacing
+    height: 320, // Slightly reduced to fit better
     ...Platform.select({
       ios: {
-        shadowColor: COLORS.shadowColor,
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
       },
       android: {
-        elevation: 3,
+        elevation: 4,
       },
     }),
   },
   imageContainer: {
-    height: 180, // Requested height: 180
+    height: 160,
     width: '100%',
     position: 'relative',
-    backgroundColor: COLORS.secondary,
-    borderTopLeftRadius: BORDER_RADIUS.lg,
-    borderTopRightRadius: BORDER_RADIUS.lg,
+    backgroundColor: '#F9FAFB',
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
     overflow: 'hidden',
   },
   imagePlaceholder: {
@@ -139,42 +137,43 @@ const styles = StyleSheet.create({
   },
   categoryBadge: {
     position: 'absolute',
-    top: SPACING.xs + 2,
-    left: SPACING.xs + 2,
-    backgroundColor: 'rgba(10, 30, 106, 0.9)', // Primary dark blue background
-    borderRadius: BORDER_RADIUS.sm,
+    top: 10,
+    left: 10,
+    backgroundColor: 'rgba(10, 30, 106, 0.9)',
+    borderRadius: 6,
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 4,
   },
   categoryText: {
     color: COLORS.white,
     fontSize: 10,
-    fontWeight: TYPOGRAPHY.weights.semibold,
+    fontWeight: '700',
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   infoContainer: {
-    padding: SPACING.sm,
+    padding: 12,
     flex: 1,
     justifyContent: 'space-between',
   },
   titleWrapper: {
-    marginBottom: 2,
+    marginBottom: 4,
   },
   name: {
     fontSize: 14,
-    fontWeight: TYPOGRAPHY.weights.bold, // Bold text
+    fontWeight: 'bold',
     color: COLORS.textPrimary,
     lineHeight: 18,
+    marginBottom: 2,
   },
   brand: {
-    fontSize: 11,
-    fontWeight: TYPOGRAPHY.weights.medium,
-    color: COLORS.textSecondary,
-    marginTop: 1,
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#6B7280',
   },
   description: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: '#6B7280',
     lineHeight: 16,
     marginVertical: 4,
   },
@@ -182,36 +181,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: SPACING.xs,
-    paddingTop: SPACING.xs,
+    marginTop: 'auto',
+    paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    borderTopColor: '#F3F4F6',
   },
   price: {
     fontSize: 16,
-    fontWeight: TYPOGRAPHY.weights.bold, // Highlighted bold price
+    fontWeight: 'bold',
     color: COLORS.primary,
   },
   stockIndicator: {
-    borderRadius: BORDER_RADIUS.sm,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   inStock: {
-    backgroundColor: 'rgba(0, 200, 83, 0.15)', // Accent Green with transparency
+    backgroundColor: '#DEF7EC',
   },
   outOfStock: {
-    backgroundColor: 'rgba(239, 68, 68, 0.15)', // Danger Red with transparency
+    backgroundColor: '#FDE8E8',
   },
   stockText: {
-    fontSize: 9,
-    fontWeight: TYPOGRAPHY.weights.bold,
+    fontSize: 10,
+    fontWeight: '700',
   },
   inStockText: {
-    color: COLORS.accent, // Accent color green (#00C853)
+    color: '#03543F',
   },
   outOfStockText: {
-    color: COLORS.danger,
+    color: '#9B1C1C',
   },
 });
 

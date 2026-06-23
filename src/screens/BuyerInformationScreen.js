@@ -20,7 +20,7 @@ import Header from '../components/Header';
 import { registerBuyer } from '../services/orderService';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../theme/theme';
 
-export const BuyerRegistrationScreen = () => {
+export const BuyerInformationScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   
@@ -286,4 +286,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BuyerRegistrationScreen;
+export default BuyerInformationScreen;

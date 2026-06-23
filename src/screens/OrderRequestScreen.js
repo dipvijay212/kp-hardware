@@ -8,7 +8,8 @@ import {
   ScrollView, 
   ActivityIndicator, 
   Alert,
-  StatusBar
+  StatusBar,
+  Linking
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -35,7 +36,7 @@ export const OrderRequestScreen = () => {
         } else {
           // If profile is missing (unexpected state), redirect to registration
           Alert.alert('Details Missing', 'Please fill in your business registration details first.');
-          navigation.navigate('BuyerRegistration', { redirectTo: 'OrderRequest' });
+          navigation.navigate('BuyerInformation', { redirectTo: 'OrderRequest' });
         }
       } catch (err) {
         console.error('Error loading buyer profile', err);
@@ -53,19 +54,50 @@ export const OrderRequestScreen = () => {
 
     setSubmitting(true);
     try {
-      // Create Firestore order record
+      // 1. Save Order To Firestore & Generate Order Number
       const result = await createOrder(buyerProfile, cartItems, totalPrice, totalItems);
       
-      // Clear the local shopping cart
-      clearCart();
+      console.log("Order Saved");
       
-      // Navigate to order confirmation success page
+      // Calculate Total Quantity
+      const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+      // 2. Create WhatsApp Message
+      let productsList = cartItems.map(item => `${item.product.name} x ${item.quantity}`).join('\n');
+
+      const message = `Hello KP Hardware,\n\nNew Wholesale Order Request\n\nOrder Number:\n${result.orderNumber}\n\nBusiness Name:\n${buyerProfile.businessName}\n\nOwner Name:\n${buyerProfile.ownerName}\n\nMobile:\n${buyerProfile.mobileNumber}\n\nProducts:\n\n${productsList}\n\nTotal Products:\n${totalItems}\n\nTotal Quantity:\n${totalQuantity}\n\nPlease contact me regarding pricing and availability.`;
+
+      const whatsappUrl = `https://wa.me/919913238496?text=${encodeURIComponent(message)}`;
+
+      console.log("Opening WhatsApp");
+      console.log("WhatsApp URL:", whatsappUrl);
+
+      // 3. Open WhatsApp
+      try {
+        // Platform Compatibility Check
+        await Linking.canOpenURL(whatsappUrl);
+        
+        // Execute BEFORE navigation
+        await Linking.openURL(whatsappUrl);
+        
+        console.log("WhatsApp Opened Successfully");
+      } catch (error) {
+        console.error("WhatsApp Error:", error);
+        console.error("Error Message:", error.message);
+        Alert.alert('WhatsApp Error', 'WhatsApp is not installed on this device.');
+      }
+      
+      // 4. Navigate To Success Screen
       navigation.replace('OrderSuccess', {
         orderNumber: result.orderNumber,
         buyerProfile: buyerProfile,
         totalItems,
         totalPrice
       });
+
+      // 5. Clear Cart
+      clearCart();
+
     } catch (error) {
       Alert.alert('Order Failed', error.message || 'Could not submit wholesale order. Please try again.');
     } finally {
@@ -108,7 +140,7 @@ export const OrderRequestScreen = () => {
             <Text style={styles.cardTitle}>Buyer Information</Text>
             <TouchableOpacity 
               style={styles.editBtn} 
-              onPress={() => navigation.navigate('BuyerRegistration', { redirectTo: 'OrderRequest' })}
+              onPress={() => navigation.navigate('BuyerInformation', { redirectTo: 'OrderRequest' })}
             >
               <Text style={styles.editBtnText}>Edit</Text>
             </TouchableOpacity>

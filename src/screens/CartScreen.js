@@ -70,7 +70,7 @@ export const CartScreen = () => {
         [
           {
             text: 'Register Now',
-            onPress: () => navigation.navigate('BuyerRegistration', { redirectTo: 'OrderRequest' })
+            onPress: () => navigation.navigate('BuyerInformation', { redirectTo: 'OrderRequest' })
           },
           {
             text: 'Cancel',

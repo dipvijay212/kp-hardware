@@ -274,11 +274,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: '#F3F4F6',
   },
   logo: {
     width: 100,
@@ -289,8 +289,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconButton: {
-    padding: SPACING.xs,
-    marginLeft: SPACING.xs,
+    padding: 8,
+    marginLeft: 4,
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
@@ -323,8 +323,8 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: SPACING.md,
-    backgroundColor: COLORS.white,
+    paddingHorizontal: 16,
+    backgroundColor: '#FFFFFF',
   },
   rowStyle: {
     justifyContent: 'space-between',
@@ -333,23 +333,24 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
   },
   listContent: {
-    paddingBottom: SPACING.xl,
-    paddingTop: SPACING.xs,
+    paddingBottom: 40,
+    paddingTop: 8,
   },
   // Skeleton styling
   skeletonCard: {
     width: CARD_WIDTH,
-    height: 330,
+    height: 320,
     backgroundColor: COLORS.white,
-    borderRadius: BORDER_RADIUS.lg, // 16px
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    marginVertical: SPACING.xs,
-    overflow: 'hidden',
+    borderColor: '#F3F4F6',
+    marginBottom: 16,
   },
   skeletonImage: {
-    height: 180,
+    height: 160,
     backgroundColor: '#E2E8F0',
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
   },
   skeletonInfo: {
     padding: SPACING.sm,

@@ -87,8 +87,7 @@ export const createOrder = async (buyerProfile, cartItems, totalPrice, totalItem
       productId: item.product.id,
       productName: item.product.name,
       brand: item.product.brand || 'KP Hardware',
-      quantity: item.quantity,
-      price: item.product.price
+      quantity: item.quantity
     }));
 
     const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -98,14 +97,13 @@ export const createOrder = async (buyerProfile, cartItems, totalPrice, totalItem
       buyerId: buyerProfile.id,
       buyerName: buyerProfile.ownerName,
       businessName: buyerProfile.businessName,
-      mobileNumber: buyerProfile.mobileNumber,
-      gstNumber: buyerProfile.gstNumber || '',
+      mobile: buyerProfile.mobileNumber,
       address: buyerProfile.address,
       status: 'Pending',
+      internalStatus: 'new', // Added to map to the user's snippet
       createdAt: serverTimestamp(),
-      totalItems,
+      totalProducts: totalItems,
       totalQuantity,
-      totalPrice,
       items
     };
 
@@ -122,15 +120,22 @@ export const createOrder = async (buyerProfile, cartItems, totalPrice, totalItem
   }
 };
 
-/**
- * Fetches the list of orders for a specific buyer.
- */
 export const getOrdersByBuyer = async (buyerId) => {
+  console.log(`[Firestore Request] Collection: ${ORDERS_COLLECTION}`);
+  console.log(`[Firestore Request] Query Parameters: buyerId == ${buyerId}`);
   try {
     const db = getFirestore();
     const colRef = collection(db, ORDERS_COLLECTION);
-    const q = query(colRef, where('buyerId', '==', buyerId), orderBy('createdAt', 'desc'));
+    
+    // Removing orderBy('createdAt', 'desc') from the query to prevent
+    // Firestore composite index missing errors (failed-precondition).
+    // We will sort the results in memory instead.
+    const q = query(colRef, where('buyerId', '==', buyerId));
+    
+    console.log(`[Firestore Request] Executing query...`);
     const snapshot = await getDocs(q);
+    
+    console.log(`[Firestore Response] Documents fetched: ${snapshot.size}`);
     
     const orders = [];
     snapshot.forEach(docSnap => {
@@ -139,47 +144,21 @@ export const getOrdersByBuyer = async (buyerId) => {
         ...docSnap.data()
       });
     });
-    return orders;
-  } catch (error) {
-    console.error(`Error loading orders for buyer ${buyerId}: `, error);
-    throw error;
-  }
-};
-
-/**
- * Fetches all orders (Admin utility).
- */
-export const getAllOrders = async () => {
-  try {
-    const db = getFirestore();
-    const colRef = collection(db, ORDERS_COLLECTION);
-    const q = query(colRef, orderBy('createdAt', 'desc'));
-    const snapshot = await getDocs(q);
     
-    const orders = [];
-    snapshot.forEach(docSnap => {
-      orders.push({
-        id: docSnap.id,
-        ...docSnap.data()
-      });
+    // Sort in memory (descending)
+    orders.sort((a, b) => {
+      const timeA = a.createdAt?.seconds || 0;
+      const timeB = b.createdAt?.seconds || 0;
+      return timeB - timeA;
     });
+
     return orders;
   } catch (error) {
-    console.error('Error loading all orders for admin: ', error);
+    console.error(`[Firestore Error] getOrdersByBuyer Failed!`);
+    console.error(`[Firestore Error] Code:`, error.code);
+    console.error(`[Firestore Error] Message:`, error.message);
+    console.error(`[Firestore Error] Actual Object:`, error);
     throw error;
   }
 };
 
-/**
- * Updates the status of an order (Admin utility).
- */
-export const updateOrderStatus = async (orderId, status) => {
-  try {
-    const db = getFirestore();
-    const docRef = doc(db, ORDERS_COLLECTION, orderId);
-    await updateDoc(docRef, { status });
-  } catch (error) {
-    console.error(`Error updating order status for ${orderId}: `, error);
-    throw error;
-  }
-};

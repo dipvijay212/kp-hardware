@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, ScrollView, Image, TouchableOpacity, Linking, Share, SafeAreaView, StatusBar, Alert } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Header } from '../components/Header';
 import { COLORS, SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../theme/theme';
 
@@ -18,9 +19,31 @@ const SHOP_INFO = {
 
 export const ProfileScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<any>>();
+  const [buyerProfile, setBuyerProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const storedProfile = await AsyncStorage.getItem('@buyer_profile');
+        if (storedProfile) {
+          setBuyerProfile(JSON.parse(storedProfile));
+        }
+      } catch (err) {
+        console.error('Error fetching buyer profile', err);
+      }
+    };
+    
+    // Subscribe to focus to reload profile when navigating back
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchProfile();
+    });
+
+    fetchProfile();
+    return unsubscribe;
+  }, [navigation]);
 
   const handleCall = () => {
-    const telUrl = `tel:${SHOP_INFO.phone.replace(/\s+/g, '')}`;
+    const telUrl = `tel:${SHOP_INFO.phone.replace(/\\s+/g, '')}`;
     Linking.openURL(telUrl).catch(() => {
       Alert.alert('Error', 'Failed to launch dialer.');
     });
@@ -28,8 +51,8 @@ export const ProfileScreen: React.FC = () => {
 
   const handleWhatsApp = () => {
     const msg = `Hello KP Hardware, I am inquiring about products in your catalog.`;
-    const waUrl = `whatsapp://send?phone=${SHOP_INFO.whatsapp.replace(/\s+/g, '')}&text=${encodeURIComponent(msg)}`;
-    const webUrl = `https://wa.me/${SHOP_INFO.whatsapp.replace(/[\s+]+/g, '')}?text=${encodeURIComponent(msg)}`;
+    const waUrl = `whatsapp://send?phone=${SHOP_INFO.whatsapp.replace(/\\s+/g, '')}&text=${encodeURIComponent(msg)}`;
+    const webUrl = `https://wa.me/${SHOP_INFO.whatsapp.replace(/[\\s+]+/g, '')}?text=${encodeURIComponent(msg)}`;
     
     Linking.canOpenURL(waUrl)
       .then((supported) => {
@@ -47,7 +70,7 @@ export const ProfileScreen: React.FC = () => {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Check out KP Hardware Catalog application! Get authentic Tools, Paints, Electrical, Plumbing, and Safety items at wholesale prices.\nAddress: ${SHOP_INFO.address}\nContact: ${SHOP_INFO.phone}`,
+        message: `Check out KP Hardware Catalog application! Get authentic Tools, Paints, Electrical, Plumbing, and Safety items at wholesale prices.\\nAddress: ${SHOP_INFO.address}\\nContact: ${SHOP_INFO.phone}`,
       });
     } catch (error) {
       console.error('Error sharing catalog', error);
@@ -60,6 +83,49 @@ export const ProfileScreen: React.FC = () => {
       <Header title="Store Information" showBackButton={false} showCart={true} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        
+        {/* Customer Profile Banner */}
+        {buyerProfile ? (
+          <View style={[styles.profileHeaderCard, SHADOWS.medium, { borderColor: COLORS.primary }]}>
+            <View style={styles.avatarCircle}>
+              <Icon name="person" size={32} color={COLORS.primary} />
+            </View>
+            <Text style={styles.storeName}>{buyerProfile.businessName}</Text>
+            <Text style={[styles.storeSubtitle, { color: COLORS.textPrimary, fontWeight: TYPOGRAPHY.weights.semibold }]}>
+              {buyerProfile.ownerName}
+            </Text>
+            
+            <View style={{ width: '100%', marginTop: SPACING.md }}>
+              <View style={styles.customerDetailRow}>
+                <Icon name="call-outline" size={16} color={COLORS.textSecondary} />
+                <Text style={styles.customerDetailText}>{buyerProfile.mobileNumber}</Text>
+              </View>
+              {buyerProfile.gstNumber ? (
+                <View style={styles.customerDetailRow}>
+                  <Icon name="document-text-outline" size={16} color={COLORS.textSecondary} />
+                  <Text style={styles.customerDetailText}>GST: {buyerProfile.gstNumber}</Text>
+                </View>
+              ) : null}
+              <View style={styles.customerDetailRow}>
+                <Icon name="location-outline" size={16} color={COLORS.textSecondary} />
+                <Text style={styles.customerDetailText}>{buyerProfile.address}</Text>
+              </View>
+            </View>
+          </View>
+        ) : (
+          <TouchableOpacity 
+            style={[styles.profileHeaderCard, SHADOWS.medium, { backgroundColor: COLORS.secondary, padding: SPACING.xl }]} 
+            onPress={() => navigation.navigate('BuyerInformation')}
+            activeOpacity={0.8}
+          >
+            <Icon name="person-add-outline" size={40} color={COLORS.primary} style={{ marginBottom: SPACING.sm }} />
+            <Text style={styles.storeName}>Not Registered</Text>
+            <Text style={styles.storeSubtitle}>Tap here to register your wholesale profile to place orders.</Text>
+          </TouchableOpacity>
+        )}
+
+        <Text style={styles.sectionHeading}>Dealer Information</Text>
+
         {/* Store Banner Card */}
         <View style={[styles.profileHeaderCard, SHADOWS.medium]}>
           <Image source={require('../assets/logo.png')} style={styles.logo} resizeMode="contain" />
@@ -300,6 +366,35 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     textAlign: 'center',
     marginBottom: SPACING.lg,
+  },
+  sectionHeading: {
+    fontSize: TYPOGRAPHY.sizes.lg,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.primary,
+    marginBottom: SPACING.md,
+    marginTop: SPACING.sm,
+    paddingHorizontal: SPACING.xs,
+  },
+  avatarCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: COLORS.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+    borderWidth: 2,
+    borderColor: COLORS.border,
+  },
+  customerDetailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  customerDetailText: {
+    fontSize: TYPOGRAPHY.sizes.sm,
+    color: COLORS.textPrimary,
+    marginLeft: 8,
   },
 });
 export default ProfileScreen;

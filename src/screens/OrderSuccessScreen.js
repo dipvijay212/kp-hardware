@@ -20,28 +20,6 @@ export const OrderSuccessScreen = () => {
   const navigation = useNavigation();
   const { orderNumber, buyerProfile, totalItems, totalPrice } = route.params;
 
-  // WhatsApp Order Notification Handler
-  const handleNotifyWhatsApp = () => {
-    const formattedPhone = `91${DEALER_NUMBER}`; // India prefix
-    
-    const message = `Hello KP Hardware,\n\nA new wholesale order request has been submitted.\n\nOrder Number:\n${orderNumber}\n\nBusiness Name:\n${buyerProfile.businessName}\n\nOwner Name:\n${buyerProfile.ownerName}\n\nMobile:\n${buyerProfile.mobileNumber}\n\nTotal Products:\n${totalItems}\n\nTotal Quantity:\n${buyerProfile.address ? 'See order summary for details' : 'N/A'}\n\nPlease review the order and contact the buyer.\n\nThank you.`;
-
-    const waUrl = `whatsapp://send?phone=${formattedPhone}&text=${encodeURIComponent(message)}`;
-    const webUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
-
-    Linking.canOpenURL(waUrl)
-      .then((supported) => {
-        if (supported) {
-          return Linking.openURL(waUrl);
-        } else {
-          // Alert requested when WhatsApp app is missing
-          Alert.alert('WhatsApp Not Installed', 'WhatsApp is not installed on this device.');
-        }
-      })
-      .catch(() => {
-        Alert.alert('WhatsApp Not Installed', 'WhatsApp is not installed on this device.');
-      });
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -53,10 +31,7 @@ export const OrderSuccessScreen = () => {
           <Icon name="checkmark-circle" size={80} color={COLORS.accent} />
         </View>
 
-        <Text style={styles.title}>Order Request Received!</Text>
-        <Text style={styles.subtitle}>
-          Your wholesale catalog order request has been saved successfully in our system database.
-        </Text>
+        <Text style={styles.title}>Order Submitted Successfully</Text>
 
         {/* Confirmation Details Card */}
         <View style={[styles.detailsCard, SHADOWS.subtle]}>
@@ -64,47 +39,32 @@ export const OrderSuccessScreen = () => {
             <Text style={styles.label}>Order Number</Text>
             <Text style={styles.orderNumber}>{orderNumber}</Text>
           </View>
-          <View style={styles.divider} />
-          <View style={styles.detailsRow}>
-            <Text style={styles.label}>Estimated Amount</Text>
-            <Text style={styles.value}>₹{totalPrice.toLocaleString('en-IN')}</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.detailsRow}>
-            <Text style={styles.label}>Business Registered</Text>
-            <Text style={styles.value}>{buyerProfile.businessName}</Text>
-          </View>
         </View>
 
-        {/* WhatsApp Notification Action */}
+        {/* Contact Dealer Action */}
         <TouchableOpacity 
           style={[styles.whatsappBtn, SHADOWS.subtle]}
-          onPress={handleNotifyWhatsApp}
+          onPress={() => {
+            const formattedPhone = `91${DEALER_NUMBER}`;
+            const message = `Hello KP Hardware, I would like to inquire about my order ${orderNumber}.`;
+            const waUrl = `whatsapp://send?phone=${formattedPhone}&text=${encodeURIComponent(message)}`;
+            Linking.canOpenURL(waUrl).then(supported => {
+              if (supported) Linking.openURL(waUrl);
+            });
+          }}
           activeOpacity={0.8}
         >
           <Icon name="logo-whatsapp" size={22} color={COLORS.white} style={styles.btnIcon} />
-          <Text style={styles.whatsappBtnText}>Notify Dealer on WhatsApp</Text>
+          <Text style={styles.whatsappBtnText}>Contact Dealer</Text>
         </TouchableOpacity>
 
-        {/* Other actions list */}
-        <View style={styles.actionsContainer}>
-          <TouchableOpacity 
-            style={[styles.actionBtn, styles.historyBtn]}
-            onPress={() => navigation.navigate('OrderHistory')}
-            activeOpacity={0.7}
-          >
-            <Icon name="receipt-outline" size={18} color={COLORS.primary} style={styles.btnIcon} />
-            <Text style={styles.historyBtnText}>View Order History</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.actionBtn, styles.homeBtn]}
-            onPress={() => navigation.navigate('Home')}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.homeBtnText}>Continue Browsing</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity 
+          style={[styles.actionBtn, styles.homeBtn, { width: '100%', marginTop: SPACING.md }]}
+          onPress={() => navigation.navigate('Home')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.homeBtnText}>Continue Shopping</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

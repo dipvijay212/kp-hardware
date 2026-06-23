@@ -47,15 +47,15 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
-    borderRadius: BORDER_RADIUS.round, // Fully rounded/oval design
+    backgroundColor: '#F9FAFB',
+    borderRadius: 24,
     height: 48,
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: 20,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: '#E5E7EB',
   },
   searchIcon: {
-    marginRight: SPACING.sm,
+    marginRight: 10,
   },
   input: {
     flex: 1,

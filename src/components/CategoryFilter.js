@@ -45,38 +45,45 @@ export const CategoryFilter = ({ selectedCategory, onSelectCategory }) => {
 
 const styles = StyleSheet.create({
   listWrapper: {
-    marginVertical: SPACING.xs,
+    marginVertical: 12,
   },
   container: {
-    paddingVertical: SPACING.xs,
+    paddingVertical: 4,
     paddingRight: SPACING.md,
   },
   chip: {
-    paddingHorizontal: SPACING.md,
-    height: 40, // Compact chips (height 40-45)
+    paddingHorizontal: 20,
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: BORDER_RADIUS.round, // Fully rounded chips
-    marginRight: SPACING.sm,
+    borderRadius: 20,
+    marginRight: 12,
     borderWidth: 1,
   },
   selectedChip: {
-    backgroundColor: COLORS.primary, // Primary navy blue (#0A1E6A)
+    backgroundColor: COLORS.primary,
     borderColor: COLORS.primary,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
   unselectedChip: {
-    backgroundColor: COLORS.secondary, // Light grey background (#F5F7FA)
-    borderColor: COLORS.border,
+    backgroundColor: '#F3F4F6',
+    borderColor: '#E5E7EB',
   },
   chipText: {
-    fontSize: 13,
-    fontWeight: TYPOGRAPHY.weights.semibold,
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 0.3,
   },
   selectedChipText: {
     color: COLORS.white,
+    fontWeight: '700',
   },
   unselectedChipText: {
-    color: COLORS.textPrimary,
+    color: '#4B5563',
   },
 });
 

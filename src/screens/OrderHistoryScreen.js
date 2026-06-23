@@ -10,55 +10,49 @@ import {
   TextInput, 
   ScrollView, 
   Alert,
-  StatusBar
+  StatusBar,
+  RefreshControl
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../components/Header';
-import { getOrdersByBuyer, getAllOrders, updateOrderStatus } from '../services/orderService';
+import { getOrdersByBuyer } from '../services/orderService';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../theme/theme';
-
-const STATUSES = ['All', 'Pending', 'Confirmed', 'Packed', 'Dispatched', 'Delivered', 'Cancelled'];
-const UPDATE_STATUSES = ['Pending', 'Confirmed', 'Packed', 'Dispatched', 'Delivered', 'Cancelled'];
 
 export const OrderHistoryScreen = () => {
   const navigation = useNavigation();
 
   const [buyerProfile, setBuyerProfile] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [orders, setOrders] = useState([]);
   
-  // Search & Filter state
+  // Search state
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('All');
   
   // Modal detail sheet state
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [detailVisible, setDetailVisible] = useState(false);
-  const [statusUpdating, setStatusUpdating] = useState(false);
 
-  const loadProfileAndOrders = async () => {
-    setLoading(true);
+  const loadProfileAndOrders = async (isRefresh = false) => {
+    if (!isRefresh) setLoading(true);
     try {
       const storedProfile = await AsyncStorage.getItem('@buyer_profile');
       if (storedProfile) {
         const parsed = JSON.parse(storedProfile);
         setBuyerProfile(parsed);
-        // Load initial orders based on role toggle (default: Buyer My Orders)
         const fetched = await getOrdersByBuyer(parsed.id);
         setOrders(fetched);
       } else {
-        // If not registered, prompt redirect
         Alert.alert(
           'Registration Required',
           'Please register your wholesale profile to view order history logs.',
           [
             {
               text: 'Register Now',
-              onPress: () => navigation.navigate('BuyerRegistration', { redirectTo: 'OrderHistory' })
+              onPress: () => navigation.navigate('BuyerInformation', { redirectTo: 'OrderHistory' })
             },
             {
               text: 'Cancel',
@@ -68,9 +62,13 @@ export const OrderHistoryScreen = () => {
         );
       }
     } catch (err) {
-      console.error('Error fetching order logs', err);
+      console.error('[OrderHistoryScreen] Error fetching order logs:');
+      console.error('[OrderHistoryScreen] Error Object:', err);
+      if (err.code) console.error('[OrderHistoryScreen] Error Code:', err.code);
+      if (err.message) console.error('[OrderHistoryScreen] Error Message:', err.message);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -78,59 +76,18 @@ export const OrderHistoryScreen = () => {
     loadProfileAndOrders();
   }, []);
 
-  const handleRoleToggle = async (adminMode) => {
-    setIsAdmin(adminMode);
-    setLoading(true);
-    try {
-      if (adminMode) {
-        // Load all database orders
-        const fetched = await getAllOrders();
-        setOrders(fetched);
-      } else if (buyerProfile) {
-        // Load buyer-specific orders
-        const fetched = await getOrdersByBuyer(buyerProfile.id);
-        setOrders(fetched);
-      }
-    } catch (err) {
-      Alert.alert('Load Error', 'Unable to fetch orders from database.');
-    } finally {
-      setLoading(false);
-    }
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadProfileAndOrders(true);
   };
 
-  const handleStatusChange = async (orderId, newStatus) => {
-    setStatusUpdating(true);
-    try {
-      await updateOrderStatus(orderId, newStatus);
-      Alert.alert('Success', `Order status updated to: ${newStatus}`);
-      
-      // Update local state in selected order modal
-      setSelectedOrder(prev => prev ? { ...prev, status: newStatus } : null);
-      
-      // Reload main orders list
-      if (isAdmin) {
-        const fetched = await getAllOrders();
-        setOrders(fetched);
-      } else if (buyerProfile) {
-        const fetched = await getOrdersByBuyer(buyerProfile.id);
-        setOrders(fetched);
-      }
-    } catch (err) {
-      Alert.alert('Update Failed', 'Could not update order status.');
-    } finally {
-      setStatusUpdating(false);
-    }
-  };
-
-  // Filter orders by status and search queries
+  // Filter orders by search queries
   const filteredOrders = orders.filter(order => {
     const matchesSearch = 
       order.orderNumber?.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
       order.businessName?.toLowerCase().includes(searchQuery.toLowerCase().trim());
       
-    const matchesStatus = selectedStatus === 'All' || order.status === selectedStatus;
-    
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
   const getStatusColor = (status) => {
@@ -161,13 +118,9 @@ export const OrderHistoryScreen = () => {
         <View style={styles.cardHeader}>
           <Text style={styles.orderNo}>{item.orderNumber}</Text>
           <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor(item.status)}18` }]}>
-            <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>{item.status}</Text>
+            <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>{item.status || 'Pending'}</Text>
           </View>
         </View>
-
-        {isAdmin && (
-          <Text style={styles.cardBusiness}>{item.businessName}</Text>
-        )}
 
         <View style={styles.cardFooter}>
           <Text style={styles.cardDate}>Date: {orderDate}</Text>
@@ -182,64 +135,20 @@ export const OrderHistoryScreen = () => {
       <StatusBar backgroundColor={COLORS.white} barStyle="dark-content" />
       <Header title="Wholesale Order Logs" showBackButton={true} showCart={false} />
 
-      {/* Role Toggle Selector */}
-      <View style={styles.toggleBar}>
-        <TouchableOpacity 
-          style={[styles.toggleBtn, !isAdmin && styles.toggleBtnActive]}
-          onPress={() => handleRoleToggle(false)}
-        >
-          <Icon name="person-outline" size={16} color={!isAdmin ? COLORS.white : COLORS.primary} />
-          <Text style={[styles.toggleBtnText, !isAdmin && styles.toggleBtnActiveText]}>My Orders</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={[styles.toggleBtn, isAdmin && styles.toggleBtnActive]}
-          onPress={() => handleRoleToggle(true)}
-        >
-          <Icon name="shield-checkmark-outline" size={16} color={isAdmin ? COLORS.white : COLORS.primary} />
-          <Text style={[styles.toggleBtnText, isAdmin && styles.toggleBtnActiveText]}>Admin View</Text>
-        </TouchableOpacity>
+      <View style={styles.headerSection}>
+        <Text style={styles.sectionTitle}>My Orders</Text>
       </View>
 
-      {/* Admin controls: Search and Status Chips */}
-      {isAdmin && (
-        <View style={styles.adminFilters}>
-          <View style={styles.searchWrapper}>
-            <Icon name="search-outline" size={18} color={COLORS.textSecondary} style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search by order ID or business..."
-              placeholderTextColor={COLORS.textLight}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-          </View>
-
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false} 
-            contentContainerStyle={styles.statusScroll}
-          >
-            {STATUSES.map(status => (
-              <TouchableOpacity
-                key={status}
-                style={[
-                  styles.statusChip,
-                  selectedStatus === status ? styles.statusChipActive : styles.statusChipInactive
-                ]}
-                onPress={() => setSelectedStatus(status)}
-              >
-                <Text style={[
-                  styles.statusChipText,
-                  selectedStatus === status ? styles.statusChipActiveText : styles.statusChipInactiveText
-                ]}>
-                  {status}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      )}
+      <View style={styles.searchWrapper}>
+        <Icon name="search-outline" size={18} color={COLORS.textSecondary} style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search your orders..."
+          placeholderTextColor={COLORS.textLight}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+      </View>
 
       {/* Main content list */}
       {loading ? (
@@ -254,12 +163,15 @@ export const OrderHistoryScreen = () => {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.primary]} />
+          }
           ListEmptyComponent={() => (
             <View style={styles.emptyContainer}>
               <Icon name="receipt-outline" size={48} color={COLORS.textLight} />
               <Text style={styles.emptyTitle}>No Orders Found</Text>
               <Text style={styles.emptySubtitle}>
-                No order requests were found matching the selected filters.
+                No order requests were found matching your search.
               </Text>
             </View>
           )}
@@ -295,7 +207,7 @@ export const OrderHistoryScreen = () => {
                     <Text style={styles.modalCardTitle}>Buyer Profile</Text>
                     <Text style={styles.modalCardText}><Text style={styles.modalBold}>Business:</Text> {selectedOrder.businessName}</Text>
                     <Text style={styles.modalCardText}><Text style={styles.modalBold}>Owner:</Text> {selectedOrder.buyerName}</Text>
-                    <Text style={styles.modalCardText}><Text style={styles.modalBold}>Phone:</Text> {selectedOrder.mobileNumber}</Text>
+                    <Text style={styles.modalCardText}><Text style={styles.modalBold}>Phone:</Text> {selectedOrder.mobile || selectedOrder.mobileNumber}</Text>
                     {selectedOrder.gstNumber ? (
                       <Text style={styles.modalCardText}><Text style={styles.modalBold}>GST IN:</Text> {selectedOrder.gstNumber}</Text>
                     ) : null}
@@ -312,46 +224,19 @@ export const OrderHistoryScreen = () => {
                           <Text style={styles.itemBrand}>{item.brand}</Text>
                         </View>
                         <Text style={styles.itemQty}>x{item.quantity}</Text>
-                        <Text style={styles.itemPrice}>₹{(item.price * item.quantity).toLocaleString('en-IN')}</Text>
+                        {item.price ? <Text style={styles.itemPrice}>₹{(item.price * item.quantity).toLocaleString('en-IN')}</Text> : null}
                       </View>
                     ))}
-                    <View style={styles.modalDivider} />
-                    <View style={styles.totalRow}>
-                      <Text style={styles.totalLabel}>Grand Estimate Amount:</Text>
-                      <Text style={styles.totalValue}>₹{Number(selectedOrder.totalPrice || 0).toLocaleString('en-IN')}</Text>
-                    </View>
-                  </View>
-
-                  {/* Status Panel (Admin mode) */}
-                  {isAdmin && (
-                    <View style={styles.modalCard}>
-                      <Text style={styles.modalCardTitle}>Modify Order Status (Admin Only)</Text>
-                      
-                      {statusUpdating ? (
-                        <ActivityIndicator size="small" color={COLORS.primary} style={{ margin: SPACING.sm }} />
-                      ) : (
-                        <View style={styles.statusButtonsContainer}>
-                          {UPDATE_STATUSES.map(status => (
-                            <TouchableOpacity
-                              key={status}
-                              style={[
-                                styles.statusUpdateBtn,
-                                selectedOrder.status === status ? { backgroundColor: getStatusColor(status) } : styles.statusUpdateBtnInactive
-                              ]}
-                              onPress={() => handleStatusChange(selectedOrder.id, status)}
-                            >
-                              <Text style={[
-                                styles.statusUpdateBtnText,
-                                selectedOrder.status === status ? { color: COLORS.white } : { color: COLORS.textPrimary }
-                              ]}>
-                                {status}
-                              </Text>
-                            </TouchableOpacity>
-                          ))}
+                    {selectedOrder.totalPrice ? (
+                      <>
+                        <View style={styles.modalDivider} />
+                        <View style={styles.totalRow}>
+                          <Text style={styles.totalLabel}>Grand Estimate Amount:</Text>
+                          <Text style={styles.totalValue}>₹{Number(selectedOrder.totalPrice || 0).toLocaleString('en-IN')}</Text>
                         </View>
-                      )}
-                    </View>
-                  )}
+                      </>
+                    ) : null}
+                  </View>
                 </ScrollView>
               </>
             )}
@@ -367,38 +252,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
-  toggleBar: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.secondary,
-    borderRadius: BORDER_RADIUS.md,
-    marginHorizontal: SPACING.md,
-    marginVertical: SPACING.sm,
-    padding: 2,
-  },
-  toggleBtn: {
-    flex: 1,
-    height: 38,
-    borderRadius: BORDER_RADIUS.md,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  toggleBtnActive: {
-    backgroundColor: COLORS.primary,
-  },
-  toggleBtnText: {
-    fontSize: 13,
-    fontWeight: TYPOGRAPHY.weights.semibold,
-    color: COLORS.primary,
-    marginLeft: 6,
-  },
-  toggleBtnActiveText: {
-    color: COLORS.white,
-  },
-  // Admin search & chips filters
-  adminFilters: {
-    backgroundColor: COLORS.white,
+  headerSection: {
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.md,
     paddingBottom: SPACING.sm,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.primary,
   },
   searchWrapper: {
     flexDirection: 'row',
@@ -421,37 +283,6 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     paddingVertical: 0,
   },
-  statusScroll: {
-    paddingLeft: SPACING.md,
-  },
-  statusChip: {
-    paddingHorizontal: 12,
-    height: 30,
-    borderRadius: BORDER_RADIUS.round,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 6,
-    borderWidth: 1,
-  },
-  statusChipActive: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
-  },
-  statusChipInactive: {
-    backgroundColor: COLORS.secondary,
-    borderColor: COLORS.border,
-  },
-  statusChipText: {
-    fontSize: 12,
-    fontWeight: TYPOGRAPHY.weights.semibold,
-  },
-  statusChipActiveText: {
-    color: COLORS.white,
-  },
-  statusChipInactiveText: {
-    color: COLORS.textPrimary,
-  },
-  // List styling
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -469,7 +300,7 @@ const styles = StyleSheet.create({
   },
   orderCard: {
     backgroundColor: COLORS.white,
-    borderRadius: BORDER_RADIUS.lg, // 16px
+    borderRadius: BORDER_RADIUS.lg,
     borderWidth: 1,
     borderColor: COLORS.border,
     padding: SPACING.md,
@@ -494,12 +325,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: TYPOGRAPHY.weights.bold,
   },
-  cardBusiness: {
-    fontSize: 13,
-    fontWeight: TYPOGRAPHY.weights.semibold,
-    color: COLORS.textPrimary,
-    marginTop: 4,
-  },
   cardFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -517,7 +342,6 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.weights.bold,
     color: COLORS.textPrimary,
   },
-  // Modal layout
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(15, 23, 42, 0.6)',
@@ -582,7 +406,6 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.weights.bold,
     color: COLORS.textSecondary,
   },
-  // Sub-items rows
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -590,6 +413,16 @@ const styles = StyleSheet.create({
   },
   itemInfo: {
     flex: 1,
+  },
+  itemName: {
+    fontSize: 14,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.textPrimary,
+  },
+  itemBrand: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    marginTop: 2,
   },
   itemQty: {
     fontSize: 13,
@@ -612,36 +445,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  modalCardTitleUpdate: {
+  totalLabel: {
     fontSize: 13,
     fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.textPrimary,
+  },
+  totalValue: {
+    fontSize: 15,
+    fontWeight: TYPOGRAPHY.weights.bold,
     color: COLORS.primary,
-    marginBottom: SPACING.xs,
   },
-  statusButtonsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: SPACING.xs,
-  },
-  statusUpdateBtn: {
-    paddingHorizontal: 12,
-    height: 32,
-    borderRadius: BORDER_RADIUS.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 6,
-    marginBottom: 6,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  statusUpdateBtnInactive: {
-    backgroundColor: COLORS.white,
-  },
-  statusUpdateBtnText: {
-    fontSize: 12,
-    fontWeight: TYPOGRAPHY.weights.semibold,
-  },
-  // Empty State styling
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',

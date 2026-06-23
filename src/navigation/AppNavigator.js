@@ -5,7 +5,7 @@ import HomeScreen from '../screens/HomeScreen';
 import ProductDetailsScreen from '../screens/ProductDetailsScreen';
 import FirebaseTestScreen from '../screens/FirebaseTestScreen';
 import { CartScreen } from '../screens/CartScreen';
-import BuyerRegistrationScreen from '../screens/BuyerRegistrationScreen';
+import BuyerInformationScreen from '../screens/BuyerInformationScreen';
 import OrderRequestScreen from '../screens/OrderRequestScreen';
 import OrderSuccessScreen from '../screens/OrderSuccessScreen';
 import OrderHistoryScreen from '../screens/OrderHistoryScreen';
@@ -27,7 +27,7 @@ export const AppNavigator = () => {
         <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} />
         <Stack.Screen name="FirebaseTest" component={FirebaseTestScreen} />
         <Stack.Screen name="Cart" component={CartScreen} />
-        <Stack.Screen name="BuyerRegistration" component={BuyerRegistrationScreen} />
+        <Stack.Screen name="BuyerInformation" component={BuyerInformationScreen} />
         <Stack.Screen name="OrderRequest" component={OrderRequestScreen} />
         <Stack.Screen name="OrderSuccess" component={OrderSuccessScreen} />
         <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
