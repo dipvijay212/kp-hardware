@@ -17,7 +17,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import SearchBar from '../components/SearchBar';
 import CategoryFilter from '../components/CategoryFilter';
 import ProductCard from '../components/ProductCard';
-import { getProducts } from '../services/productService';
+import { getProducts, getCategories } from '../services/productService';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../theme/theme';
 import { useCart } from '../context/CartContext';
 
@@ -33,7 +33,7 @@ export const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-
+  const [categories, setCategories] = useState([]);
   // Pulsing animation value for skeleton loaders
   const [pulseAnim] = useState(new Animated.Value(0.4));
 
@@ -65,8 +65,11 @@ export const HomeScreen = () => {
       
       // Fetch up to 100 products for display/filtering
       const { products: fetchedProducts } = await getProducts(100, null);
-      console.log('Successfully read Firestore products count:', fetchedProducts.length);
       setProducts(fetchedProducts);
+      
+      // Fetch dynamic categories
+      const fetchedCategories = await getCategories();
+      setCategories(fetchedCategories);
     } catch (error) {
       console.error('Error in HomeScreen load: ', error);
     } finally {
@@ -229,10 +232,10 @@ export const HomeScreen = () => {
 
         {/* Category Filter Chips */}
         <CategoryFilter
+          categories={categories}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
         />
-
         {loading ? (
           renderSkeletons()
         ) : (

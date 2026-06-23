@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, FlatList, SafeAreaView, StatusBar } from 'react-native';
+import { View, StyleSheet, FlatList, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header } from '../components/Header';
 import { CategoryCard } from '../components/CategoryCard';
 import { COLORS, SPACING } from '../theme/theme';

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, StyleSheet, TextInput, FlatList, Text, TouchableOpacity, ActivityIndicator, SafeAreaView, Keyboard, StatusBar } from 'react-native';
+import { View, StyleSheet, TextInput, FlatList, Text, TouchableOpacity, ActivityIndicator, Keyboard, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { ProductCard } from '../components/ProductCard';
 import { COLORS, SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../theme/theme';

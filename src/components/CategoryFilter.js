@@ -2,9 +2,8 @@ import React from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../theme/theme';
 
-const CATEGORIES = ['All', 'Tools', 'Electrical', 'Plumbing', 'Painting', 'Safety'];
-
-export const CategoryFilter = ({ selectedCategory, onSelectCategory }) => {
+export const CategoryFilter = ({ categories = [], selectedCategory, onSelectCategory }) => {
+  const displayCategories = ['All', ...categories];
   const renderItem = ({ item }) => {
     const isSelected = selectedCategory === item;
     return (
@@ -31,7 +30,7 @@ export const CategoryFilter = ({ selectedCategory, onSelectCategory }) => {
   return (
     <View style={styles.listWrapper}>
       <FlatList
-        data={CATEGORIES}
+        data={displayCategories}
         renderItem={renderItem}
         keyExtractor={(item) => item}
         horizontal

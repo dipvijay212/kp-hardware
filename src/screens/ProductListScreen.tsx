@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator, Text, SafeAreaView, StatusBar } from 'react-native';
+import { View, StyleSheet, FlatList, ActivityIndicator, Text, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { Header } from '../components/Header';
 import { ProductCard } from '../components/ProductCard';

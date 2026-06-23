@@ -8,10 +8,7 @@ export const ProductCard = ({ product }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  // Fallback high quality hardware placeholder image if URL fails
-  const imageUri = imageError || !product.image 
-    ? 'https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=400' 
-    : product.image;
+  const hasValidImage = product.image && !imageError;
 
   const handlePress = () => {
     navigation.navigate('ProductDetails', { product });
@@ -35,15 +32,17 @@ export const ProductCard = ({ product }) => {
           />
         </View>
 
-        <Image
-          source={{ uri: imageUri }}
-          style={styles.image}
-          resizeMode="cover"
-          onLoad={() => setImageLoaded(true)}
-          onError={() => setImageError(true)}
-        />
+        {hasValidImage && (
+          <Image
+            source={{ uri: product.image }}
+            style={styles.image}
+            resizeMode="cover"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
+          />
+        )}
 
-        {!imageLoaded && !imageError && (
+        {hasValidImage && !imageLoaded && (
           <View style={styles.spinnerContainer}>
             <ActivityIndicator size="small" color={COLORS.primary} />
           </View>

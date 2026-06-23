@@ -16,6 +16,28 @@ import {
 const COLLECTION_NAME = 'products';
 
 /**
+ * Fetches all categories from Firestore.
+ * @returns {Promise<Array<string>>}
+ */
+export const getCategories = async () => {
+  try {
+    const db = getFirestore();
+    const colRef = collection(db, 'categories');
+    const snapshot = await getDocs(colRef);
+    const categories = [];
+    snapshot.forEach((docSnap) => {
+      if (docSnap.data().name) {
+        categories.push(docSnap.data().name);
+      }
+    });
+    return categories;
+  } catch (error) {
+    console.error('Error fetching categories from Firestore: ', error);
+    throw error;
+  }
+};
+
+/**
   * Fetches a paginated list of products from Firestore.
   * Supports 3000+ products using query limit and startAfter cursor.
   * @param {number} limitValue - Number of documents to fetch per page.
