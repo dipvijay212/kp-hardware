@@ -44,7 +44,8 @@ export const CategoryFilter = ({ categories = [], selectedCategory, onSelectCate
 
 const styles = StyleSheet.create({
   listWrapper: {
-    marginVertical: 12,
+    marginTop: 8,
+    marginBottom: 20,
   },
   container: {
     paddingVertical: 4,
@@ -56,7 +57,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 20,
-    marginRight: 12,
+    marginRight: 16,
     borderWidth: 1,
   },
   selectedChip: {

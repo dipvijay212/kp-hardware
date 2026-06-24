@@ -47,9 +47,9 @@ export const OrderSuccessScreen = () => {
           onPress={() => {
             const formattedPhone = `91${DEALER_NUMBER}`;
             const message = `Hello KP Hardware, I would like to inquire about my order ${orderNumber}.`;
-            const waUrl = `whatsapp://send?phone=${formattedPhone}&text=${encodeURIComponent(message)}`;
-            Linking.canOpenURL(waUrl).then(supported => {
-              if (supported) Linking.openURL(waUrl);
+            const waUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+            Linking.openURL(waUrl).catch(() => {
+              Alert.alert('Error', 'Could not open WhatsApp.');
             });
           }}
           activeOpacity={0.8}
@@ -59,7 +59,7 @@ export const OrderSuccessScreen = () => {
         </TouchableOpacity>
 
         <TouchableOpacity 
-          style={[styles.actionBtn, styles.homeBtn, { width: '100%', marginTop: SPACING.md }]}
+          style={styles.homeBtn}
           onPress={() => navigation.navigate('Home')}
           activeOpacity={0.7}
         >
@@ -179,6 +179,12 @@ const styles = StyleSheet.create({
   },
   homeBtn: {
     backgroundColor: COLORS.primary,
+    height: 50,
+    width: '100%',
+    borderRadius: BORDER_RADIUS.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: SPACING.md,
   },
   homeBtnText: {
     color: COLORS.white,

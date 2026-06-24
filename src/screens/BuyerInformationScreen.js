@@ -19,6 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../components/Header';
 import { registerBuyer } from '../services/orderService';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../theme/theme';
+import { showAlert } from '../components/CustomAlert';
 
 export const BuyerInformationScreen = () => {
   const navigation = useNavigation();
@@ -36,11 +37,11 @@ export const BuyerInformationScreen = () => {
 
   const handleRegister = async () => {
     // Basic validation checks
-    if (!businessName.trim()) return Alert.alert('Validation Error', 'Please enter your Business Name.');
-    if (!ownerName.trim()) return Alert.alert('Validation Error', 'Please enter the Owner\'s Name.');
-    if (!mobileNumber.trim()) return Alert.alert('Validation Error', 'Please enter your Mobile Number.');
-    if (mobileNumber.trim().length < 10) return Alert.alert('Validation Error', 'Mobile Number must be at least 10 digits.');
-    if (!address.trim()) return Alert.alert('Validation Error', 'Please enter your Delivery Address.');
+    if (!businessName.trim()) return showAlert('Validation Error', 'Please enter your Business Name.');
+    if (!ownerName.trim()) return showAlert('Validation Error', 'Please enter the Owner\'s Name.');
+    if (!mobileNumber.trim()) return showAlert('Validation Error', 'Please enter your Mobile Number.');
+    if (mobileNumber.trim().length < 10) return showAlert('Validation Error', 'Mobile Number must be at least 10 digits.');
+    if (!address.trim()) return showAlert('Validation Error', 'Please enter your Delivery Address.');
 
     const buyerData = {
       businessName: businessName.trim(),
@@ -63,7 +64,7 @@ export const BuyerInformationScreen = () => {
       // 2. Persist buyer credentials locally in AsyncStorage
       await AsyncStorage.setItem('@buyer_profile', JSON.stringify(buyerProfile));
       
-      Alert.alert('Registration Successful', 'Welcome to KP Hardware Wholesales!', [
+      showAlert('Registration Successful', 'Welcome to KP Hardware Wholesales!', [
         {
           text: 'Proceed',
           onPress: () => {
@@ -76,7 +77,7 @@ export const BuyerInformationScreen = () => {
         }
       ]);
     } catch (error) {
-      Alert.alert('Registration Failed', error.message || 'Unable to connect to database.');
+      showAlert('Registration Failed', error.message || 'Unable to connect to database.');
     } finally {
       setLoading(false);
     }

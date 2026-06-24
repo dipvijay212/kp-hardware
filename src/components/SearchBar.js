@@ -16,7 +16,7 @@ export const SearchBar = ({ value, onChangeText, placeholder = "Search hardware 
           onChangeText={onChangeText}
           returnKeyType="search"
           autoCapitalize="none"
-          clearButtonMode="never" // Custom clear button is handled below
+          clearButtonMode="never"
         />
         {value.length > 0 && (
           <TouchableOpacity onPress={() => onChangeText('')} style={styles.clearButton} activeOpacity={0.7}>
@@ -30,8 +30,8 @@ export const SearchBar = ({ value, onChangeText, placeholder = "Search hardware 
 
 const styles = StyleSheet.create({
   shadowWrapper: {
-    marginVertical: SPACING.sm,
-    // Soft shadow effect
+    marginTop: 16,
+    marginBottom: 8,
     ...Platform.select({
       ios: {
         shadowColor: COLORS.shadowColor,
@@ -48,14 +48,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F9FAFB',
-    borderRadius: 24,
-    height: 48,
-    paddingHorizontal: 20,
+    borderRadius: 26,
+    height: 52,
+    paddingHorizontal: 24,
     borderWidth: 1,
     borderColor: '#E5E7EB',
   },
   searchIcon: {
-    marginRight: 10,
+    marginRight: 12,
   },
   input: {
     flex: 1,

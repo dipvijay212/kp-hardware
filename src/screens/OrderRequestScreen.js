@@ -19,6 +19,7 @@ import Header from '../components/Header';
 import { createOrder } from '../services/orderService';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../theme/theme';
 import { useCart } from '../context/CartContext';
+import { showAlert } from '../components/CustomAlert';
 
 export const OrderRequestScreen = () => {
   const navigation = useNavigation();
@@ -35,7 +36,7 @@ export const OrderRequestScreen = () => {
           setBuyerProfile(JSON.parse(storedProfile));
         } else {
           // If profile is missing (unexpected state), redirect to registration
-          Alert.alert('Details Missing', 'Please fill in your business registration details first.');
+          showAlert('Details Missing', 'Please fill in your business registration details first.');
           navigation.navigate('BuyerInformation', { redirectTo: 'OrderRequest' });
         }
       } catch (err) {
@@ -48,7 +49,7 @@ export const OrderRequestScreen = () => {
   const handleSubmitOrder = async () => {
     if (!buyerProfile) return;
     if (cartItems.length === 0) {
-      Alert.alert('Empty Order', 'Please add products to your cart before submitting.');
+      showAlert('Empty Order', 'Please add products to your cart before submitting.');
       return;
     }
 
@@ -63,9 +64,9 @@ export const OrderRequestScreen = () => {
       const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
       // 2. Create WhatsApp Message
-      let productsList = cartItems.map(item => `${item.product.name} x ${item.quantity}`).join('\n');
+      let productsList = cartItems.map(item => `• ${item.product.name} × ${item.quantity}`).join('\n\n');
 
-      const message = `Hello KP Hardware,\n\nNew Wholesale Order Request\n\nOrder Number:\n${result.orderNumber}\n\nBusiness Name:\n${buyerProfile.businessName}\n\nOwner Name:\n${buyerProfile.ownerName}\n\nMobile:\n${buyerProfile.mobileNumber}\n\nProducts:\n\n${productsList}\n\nTotal Products:\n${totalItems}\n\nTotal Quantity:\n${totalQuantity}\n\nPlease contact me regarding pricing and availability.`;
+      const message = `🏢 KP Hardware - Wholesale Order Request\n━━━━━━━━━━━━━━━━━━━━\n\n📋 Order Details\n\nOrder No: ${result.orderNumber}\n\nBusiness Name: ${buyerProfile.businessName}\n\nOwner Name: ${buyerProfile.ownerName}\n\nMobile: ${buyerProfile.mobileNumber}\n━━━━━━━━━━━━━━━━━━━━\n\n🛒 Products\n\n${productsList}\n━━━━━━━━━━━━━━━━━━━━\n\n📊 Summary\n\nTotal Products: ${totalItems}\n\nTotal Quantity: ${totalQuantity}\n━━━━━━━━━━━━━━━━━━━━\n\nPlease contact the buyer regarding pricing, stock availability, and delivery details.`;
 
       const whatsappUrl = `https://wa.me/919913238496?text=${encodeURIComponent(message)}`;
 
@@ -84,7 +85,7 @@ export const OrderRequestScreen = () => {
       } catch (error) {
         console.error("WhatsApp Error:", error);
         console.error("Error Message:", error.message);
-        Alert.alert('WhatsApp Error', 'WhatsApp is not installed on this device.');
+        showAlert('WhatsApp Error', 'WhatsApp is not installed on this device.');
       }
       
       // 4. Navigate To Success Screen
@@ -99,7 +100,7 @@ export const OrderRequestScreen = () => {
       clearCart();
 
     } catch (error) {
-      Alert.alert('Order Failed', error.message || 'Could not submit wholesale order. Please try again.');
+      showAlert('Order Failed', error.message || 'Could not submit wholesale order. Please try again.');
     } finally {
       setSubmitting(false);
     }

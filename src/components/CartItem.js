@@ -37,7 +37,7 @@ export const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
         <View style={styles.controlsRow}>
           <QuantitySelector
             quantity={item.quantity}
-            maxQuantity={product.stock || 999}
+            maxQuantity={typeof product.stock === 'number' ? product.stock : 999}
             onIncrease={() => onUpdateQuantity(product.id, item.quantity + 1)}
             onDecrease={() => onUpdateQuantity(product.id, item.quantity - 1)}
           />

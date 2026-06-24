@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Header } from '../components/Header';
 import { COLORS, SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../theme/theme';
+import { showAlert } from '../components/CustomAlert';
 
 const SHOP_INFO = {
   name: 'KP Hardware Store',
@@ -46,7 +47,7 @@ export const ProfileScreen: React.FC = () => {
   const handleCall = () => {
     const telUrl = `tel:${SHOP_INFO.phone.replace(/\\s+/g, '')}`;
     Linking.openURL(telUrl).catch(() => {
-      Alert.alert('Error', 'Failed to launch dialer.');
+      showAlert('Error', 'Failed to launch dialer.');
     });
   };
 

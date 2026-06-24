@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { Header } from '../components/Header';
 import { getProducts, addProduct } from '../services/productService';
 import { COLORS, SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../theme/theme';
+import { showAlert } from '../components/CustomAlert';
 
 const LIMIT_PER_PAGE = 20;
 
@@ -29,7 +30,7 @@ export const FirebaseTestScreen = () => {
       setLastVisibleDoc(lastDoc);
     } catch (err) {
       setError(err.message || 'Failed to connect to Firestore');
-      Alert.alert('Error', err.message || 'Failed to fetch products');
+      showAlert('Error', err.message || 'Failed to fetch products');
     } finally {
       setLoading(false);
     }
@@ -74,11 +75,11 @@ export const FirebaseTestScreen = () => {
     try {
       setLoading(true);
       const createdId = await addProduct(sampleProduct);
-      Alert.alert('Success', `Sample product created with ID: ${createdId}`);
+      showAlert('Success', `Sample product created with ID: ${createdId}`);
       // Refresh list
       await fetchProducts(true);
     } catch (err) {
-      Alert.alert('Write Failed', err.message || 'Could not write to database');
+      showAlert('Write Failed', err.message || 'Could not write to database');
     } finally {
       setLoading(false);
     }

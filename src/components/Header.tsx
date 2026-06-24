@@ -23,7 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   style
 }) => {
   const navigation = useNavigation<NavigationProp<any>>();
-  const { totalQuantity } = useCart();
+  const { totalItems } = useCart();
 
   return (
     <View style={[styles.container, SHADOWS.subtle, style]}>
@@ -80,10 +80,10 @@ export const Header: React.FC<HeaderProps> = ({
           activeOpacity={0.7}
         >
           <Icon name="cart-outline" size={26} color={COLORS.primary} />
-          {totalQuantity > 0 && (
+          {totalItems > 0 && (
             <View style={styles.badgeContainer}>
               <Text style={styles.badgeText}>
-                {totalQuantity > 99 ? '99+' : totalQuantity}
+                {totalItems > 99 ? '99+' : totalItems}
               </Text>
             </View>
           )}
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -2,
     right: -2,
-    backgroundColor: COLORS.secondary, // Red badge
+    backgroundColor: COLORS.danger, // Red badge
     borderRadius: BORDER_RADIUS.round,
     minWidth: 16,
     height: 16,

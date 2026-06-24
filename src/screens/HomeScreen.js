@@ -22,7 +22,9 @@ import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../theme/th
 import { useCart } from '../context/CartContext';
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = (width - SPACING.md * 3) / 2;
+const GRID_GAP = 10;
+const SCREEN_PADDING = 16;
+const CARD_WIDTH = (width - SCREEN_PADDING * 2 - GRID_GAP) / 2;
 
 export const HomeScreen = () => {
   const navigation = useNavigation();
@@ -191,6 +193,7 @@ export const HomeScreen = () => {
           <TouchableOpacity 
             style={styles.iconButton} 
             activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             onPress={() => navigation.navigate('Profile')}
           >
             <Icon name="storefront-outline" size={24} color={COLORS.primary} />
@@ -199,12 +202,17 @@ export const HomeScreen = () => {
           <TouchableOpacity 
             style={styles.iconButton} 
             activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             onPress={() => navigation.navigate('OrderHistory')}
           >
             <Icon name="receipt-outline" size={24} color={COLORS.primary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+          <TouchableOpacity 
+            style={styles.iconButton} 
+            activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
             <Icon name="notifications-outline" size={24} color={COLORS.primary} />
             <View style={styles.notificationDot} />
           </TouchableOpacity>
@@ -212,6 +220,7 @@ export const HomeScreen = () => {
           <TouchableOpacity 
             style={styles.iconButton} 
             activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             onPress={() => navigation.navigate('Cart')}
           >
             <Icon name="cart-outline" size={24} color={COLORS.primary} />
@@ -292,15 +301,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconButton: {
-    padding: 8,
-    marginLeft: 4,
+    padding: 6,
+    marginLeft: 8,
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
   },
   notificationDot: {
     position: 'absolute',
-    top: 4,
+    top: 6,
     right: 6,
     width: 8,
     height: 8,
@@ -310,7 +319,7 @@ const styles = StyleSheet.create({
   cartBadge: {
     position: 'absolute',
     top: -2,
-    right: -2,
+    right: -4,
     backgroundColor: COLORS.danger, // Red badge
     borderRadius: BORDER_RADIUS.round,
     minWidth: 16,
@@ -326,7 +335,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: SCREEN_PADDING,
     backgroundColor: '#FFFFFF',
   },
   rowStyle: {
@@ -334,29 +343,30 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     width: CARD_WIDTH,
+    marginBottom: GRID_GAP,
   },
   listContent: {
     paddingBottom: 40,
-    paddingTop: 8,
+    paddingTop: 0,
   },
   // Skeleton styling
   skeletonCard: {
     width: CARD_WIDTH,
-    height: 320,
+    height: 240,
     backgroundColor: COLORS.white,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#F3F4F6',
-    marginBottom: 16,
+    marginBottom: GRID_GAP,
   },
   skeletonImage: {
-    height: 160,
+    height: 130,
     backgroundColor: '#E2E8F0',
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
   },
   skeletonInfo: {
-    padding: SPACING.sm,
+    padding: 12,
     flex: 1,
     justifyContent: 'space-between',
   },

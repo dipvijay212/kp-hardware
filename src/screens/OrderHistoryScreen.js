@@ -20,6 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../components/Header';
 import { getOrdersByBuyer } from '../services/orderService';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../theme/theme';
+import { showAlert } from '../components/CustomAlert';
 
 export const OrderHistoryScreen = () => {
   const navigation = useNavigation();
@@ -46,7 +47,7 @@ export const OrderHistoryScreen = () => {
         const fetched = await getOrdersByBuyer(parsed.id);
         setOrders(fetched);
       } else {
-        Alert.alert(
+        showAlert(
           'Registration Required',
           'Please register your wholesale profile to view order history logs.',
           [

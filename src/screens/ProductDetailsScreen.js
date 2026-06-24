@@ -19,6 +19,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../theme/theme';
 import { useCart } from '../context/CartContext';
+import { showAlert } from '../components/CustomAlert';
 
 const { width } = Dimensions.get('window');
 
@@ -34,15 +35,12 @@ export const ProductDetailsScreen = () => {
   // Cart Actions Integration
   const { addToCart } = useCart();
 
-  // Fallback high quality placeholder image if Cloudinary/Firebase URL fails
-  const imageUri = imageError || !product.image
-    ? 'https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=600'
-    : product.image;
+  const hasValidImage = product.image && !imageError;
 
   // Add to Cart Action
   const handleAddToCart = () => {
     addToCart(product, 1);
-    Alert.alert('Added to Cart', `${product.name} has been added to your wholesale cart successfully.`);
+    showAlert('Added to Cart', `${product.name} has been added to your wholesale cart successfully.`);
   };
 
   // 1. Call Dealer Handler
@@ -53,11 +51,11 @@ export const ProductDetailsScreen = () => {
         if (supported) {
           return Linking.openURL(telUrl);
         } else {
-          Alert.alert('Call Failed', 'Unable to make a phone call.');
+          showAlert('Call Failed', 'Unable to make a phone call.');
         }
       })
       .catch(() => {
-        Alert.alert('Call Failed', 'Unable to make a phone call.');
+        showAlert('Call Failed', 'Unable to make a phone call.');
       });
   };
 
@@ -77,11 +75,11 @@ export const ProductDetailsScreen = () => {
           return Linking.openURL(waUrl);
         } else {
           // If WhatsApp app is not installed, show the requested alert
-          Alert.alert('WhatsApp Not Installed', 'WhatsApp is not installed on this device.');
+          showAlert('WhatsApp Not Installed', 'WhatsApp is not installed on this device.');
         }
       })
       .catch(() => {
-        Alert.alert('WhatsApp Not Installed', 'WhatsApp is not installed on this device.');
+        showAlert('WhatsApp Not Installed', 'WhatsApp is not installed on this device.');
       });
   };
 
@@ -115,12 +113,23 @@ export const ProductDetailsScreen = () => {
         >
           {/* Large Image Banner */}
           <View style={styles.imageContainer}>
-            <Image
-              source={{ uri: imageUri }}
-              style={styles.image}
-              resizeMode="cover"
-              onError={() => setImageError(true)}
-            />
+            {/* Skeleton/Placeholder Loader */}
+            <View style={[StyleSheet.absoluteFillObject, { justifyContent: 'center', alignItems: 'center', opacity: 0.1 }]}>
+              <Image
+                source={require('../assets/logo.png')}
+                style={{ width: 120, height: 60 }}
+                resizeMode="contain"
+              />
+            </View>
+
+            {hasValidImage && (
+              <Image
+                source={{ uri: product.image }}
+                style={styles.image}
+                resizeMode="contain"
+                onError={() => setImageError(true)}
+              />
+            )}
           </View>
 
           {/* Product Details Card Sheet */}
@@ -233,7 +242,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: width,
-    height: 320, // High resolution visual banner height
+    height: 240, // Reduced by 25% from 320px
     backgroundColor: COLORS.secondary,
   },
   image: {
@@ -241,25 +250,26 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   detailsContainer: {
-    padding: SPACING.md,
+    padding: 16,
+    paddingTop: 16,
     backgroundColor: COLORS.white,
-    borderTopLeftRadius: BORDER_RADIUS.lg,
-    borderTopRightRadius: BORDER_RADIUS.lg,
-    marginTop: -SPACING.md, // Subtle overlap for modern visual depth
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    marginTop: -20, // overlap image slightly more
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: SPACING.sm,
+    marginBottom: 8,
   },
   categoryBadge: {
     backgroundColor: COLORS.secondary,
     borderWidth: 1,
     borderColor: COLORS.border,
     borderRadius: BORDER_RADIUS.sm,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     paddingVertical: 4,
-    marginRight: SPACING.sm,
+    marginRight: 8,
   },
   categoryText: {
     fontSize: 11,
@@ -269,7 +279,7 @@ const styles = StyleSheet.create({
   },
   stockBadge: {
     borderRadius: BORDER_RADIUS.sm,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     paddingVertical: 4,
   },
   inStock: {
@@ -289,15 +299,16 @@ const styles = StyleSheet.create({
     color: COLORS.danger,
   },
   name: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: TYPOGRAPHY.weights.bold,
     color: COLORS.textPrimary,
-    lineHeight: 28,
+    lineHeight: 26,
+    marginBottom: 4,
   },
   brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: SPACING.xs,
+    marginBottom: 0,
   },
   brandLabel: {
     fontSize: 13,
@@ -312,11 +323,12 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: COLORS.border,
-    marginVertical: SPACING.md,
+    marginVertical: 12,
   },
   priceContainer: {
     backgroundColor: COLORS.secondary,
-    padding: SPACING.md,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderRadius: BORDER_RADIUS.md,
   },
   priceLabel: {
@@ -329,7 +341,7 @@ const styles = StyleSheet.create({
   priceRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    marginTop: SPACING.xs,
+    marginTop: 4,
   },
   priceSymbol: {
     fontSize: 20,
@@ -343,13 +355,13 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
   descriptionSection: {
-    marginTop: SPACING.xs,
+    marginTop: 0,
   },
   descriptionHeader: {
     fontSize: 16,
     fontWeight: TYPOGRAPHY.weights.bold,
     color: COLORS.primary,
-    marginBottom: SPACING.sm,
+    marginBottom: 8,
   },
   description: {
     fontSize: 14,

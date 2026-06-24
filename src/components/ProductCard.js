@@ -18,7 +18,7 @@ export const ProductCard = ({ product }) => {
 
   return (
     <TouchableOpacity
-      style={[styles.card, SHADOWS.subtle]}
+      style={styles.card}
       onPress={handlePress}
       activeOpacity={0.95}
     >
@@ -36,7 +36,7 @@ export const ProductCard = ({ product }) => {
           <Image
             source={{ uri: product.image }}
             style={styles.image}
-            resizeMode="cover"
+            resizeMode="contain"
             onLoad={() => setImageLoaded(true)}
             onError={() => setImageError(true)}
           />
@@ -56,11 +56,11 @@ export const ProductCard = ({ product }) => {
 
       <View style={styles.infoContainer}>
         <View style={styles.titleWrapper}>
-          <Text style={styles.name} numberOfLines={1}>{product.name}</Text>
+          <Text style={styles.name} numberOfLines={2}>{product.name}</Text>
           <Text style={styles.brand} numberOfLines={1}>{product.brand}</Text>
         </View>
         
-        <Text style={styles.description} numberOfLines={2}>
+        <Text style={styles.description} numberOfLines={1}>
           {product.description || 'Professional grade hardware equipment.'}
         </Text>
 
@@ -91,22 +91,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#F3F4F6',
     flex: 1,
-    marginBottom: 16, // Use only bottom margin for grid spacing
-    height: 320, // Slightly reduced to fit better
+    height: 240,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.08,
-        shadowRadius: 12,
+        shadowRadius: 6,
       },
       android: {
-        elevation: 4,
+        elevation: 3,
       },
     }),
   },
   imageContainer: {
-    height: 160,
+    height: 130, // approximately 54% of 240
     width: '100%',
     position: 'relative',
     backgroundColor: '#F9FAFB',
@@ -136,52 +135,53 @@ const styles = StyleSheet.create({
   },
   categoryBadge: {
     position: 'absolute',
-    top: 10,
-    left: 10,
+    top: 8,
+    left: 8,
     backgroundColor: 'rgba(10, 30, 106, 0.9)',
     borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
   },
   categoryText: {
     color: COLORS.white,
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   infoContainer: {
-    padding: 12,
+    padding: 10, // slightly tighter padding to fit the larger image and 2-line title
     flex: 1,
     justifyContent: 'space-between',
   },
   titleWrapper: {
-    marginBottom: 4,
+    marginBottom: 0,
   },
   name: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontSize: 14, // reduce slightly to accommodate 2 lines gracefully
+    fontWeight: '600',
     color: COLORS.textPrimary,
     lineHeight: 18,
-    marginBottom: 2,
+    marginBottom: 0,
   },
   brand: {
     fontSize: 12,
     fontWeight: '500',
     color: '#6B7280',
+    marginTop: 2,
   },
   description: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#6B7280',
-    lineHeight: 16,
-    marginVertical: 4,
+    lineHeight: 14,
+    marginVertical: 2,
   },
   footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 'auto',
-    paddingTop: 12,
+    marginTop: 'auto', // Pinned to bottom
+    paddingTop: 6,
     borderTopWidth: 1,
     borderTopColor: '#F3F4F6',
   },
@@ -192,8 +192,9 @@ const styles = StyleSheet.create({
   },
   stockIndicator: {
     borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    marginLeft: 4, // More spacing
   },
   inStock: {
     backgroundColor: '#DEF7EC',
@@ -203,7 +204,7 @@ const styles = StyleSheet.create({
   },
   stockText: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   inStockText: {
     color: '#03543F',

@@ -16,6 +16,7 @@ import Header from '../components/Header';
 import CartItemComponent from '../components/CartItem';
 import { COLORS, SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../theme/theme';
 import { useCart } from '../context/CartContext';
+import { showAlert } from '../components/CustomAlert';
 
 export const CartScreen = () => {
   const navigation = useNavigation();
@@ -57,14 +58,14 @@ export const CartScreen = () => {
 
   const handleCheckout = () => {
     if (cartItems.length === 0) {
-      Alert.alert('Empty Cart', 'Please add products to your cart before proceeding.');
+      showAlert('Empty Cart', 'Please add products to your cart before proceeding.');
       return;
     }
 
     if (buyerProfile) {
       navigation.navigate('OrderRequest');
     } else {
-      Alert.alert(
+      showAlert(
         'Registration Required',
         'You need to register your business details to request wholesale orders.',
         [
