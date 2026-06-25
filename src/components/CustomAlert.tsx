@@ -51,7 +51,7 @@ export const CustomAlert = () => {
   return (
     <Modal transparent animationType="fade" visible={!!config} onRequestClose={() => setConfig(null)}>
       <View style={styles.overlay}>
-        <View style={[styles.alertBox, SHADOWS.large]}>
+        <View style={[styles.alertBox, SHADOWS.strong]}>
           {isSuccess && (
             <Icon 
               name="checkmark-circle" 

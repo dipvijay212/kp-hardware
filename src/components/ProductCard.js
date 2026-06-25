@@ -14,8 +14,6 @@ export const ProductCard = ({ product }) => {
     navigation.navigate('ProductDetails', { product });
   };
 
-  const formattedPrice = Number(product.price || 0).toLocaleString('en-IN');
-
   return (
     <TouchableOpacity
       style={styles.card}
@@ -23,14 +21,6 @@ export const ProductCard = ({ product }) => {
       activeOpacity={0.95}
     >
       <View style={styles.imageContainer}>
-        {/* Skeleton/Placeholder Loader */}
-        <View style={styles.imagePlaceholder}>
-          <Image
-            source={require('../assets/logo.png')}
-            style={styles.placeholderLogo}
-            resizeMode="contain"
-          />
-        </View>
 
         {hasValidImage && (
           <Image
@@ -48,36 +38,11 @@ export const ProductCard = ({ product }) => {
           </View>
         )}
 
-        {/* Category badge overlay at top-left of image */}
-        <View style={styles.categoryBadge}>
-          <Text style={styles.categoryText}>{product.category}</Text>
-        </View>
       </View>
 
       <View style={styles.infoContainer}>
         <View style={styles.titleWrapper}>
           <Text style={styles.name} numberOfLines={2}>{product.name}</Text>
-          <Text style={styles.brand} numberOfLines={1}>{product.brand}</Text>
-        </View>
-        
-        <Text style={styles.description} numberOfLines={1}>
-          {product.description || 'Professional grade hardware equipment.'}
-        </Text>
-
-        <View style={styles.footerRow}>
-          <Text style={styles.price}>₹{formattedPrice}</Text>
-          
-          <View style={[
-            styles.stockIndicator,
-            product.stock ? styles.inStock : styles.outOfStock
-          ]}>
-            <Text style={[
-              styles.stockText,
-              product.stock ? styles.inStockText : styles.outOfStockText
-            ]}>
-              {product.stock ? 'In Stock' : 'Out of Stock'}
-            </Text>
-          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -91,7 +56,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#F3F4F6',
     flex: 1,
-    height: 240,
+    overflow: 'hidden',
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -105,23 +70,13 @@ const styles = StyleSheet.create({
     }),
   },
   imageContainer: {
-    height: 130, // approximately 54% of 240
+    height: 135,
     width: '100%',
     position: 'relative',
-    backgroundColor: '#F9FAFB',
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
     overflow: 'hidden',
-  },
-  imagePlaceholder: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
     alignItems: 'center',
-    opacity: 0.08,
-  },
-  placeholderLogo: {
-    width: 60,
-    height: 30,
+    justifyContent: 'flex-start',
+    backgroundColor: 'transparent', // Allow background to show through
   },
   image: {
     width: '100%',
@@ -133,26 +88,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.4)',
   },
-  categoryBadge: {
-    position: 'absolute',
-    top: 8,
-    left: 8,
-    backgroundColor: 'rgba(10, 30, 106, 0.9)',
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-  },
-  categoryText: {
-    color: COLORS.white,
-    fontSize: 9,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
   infoContainer: {
-    padding: 10, // slightly tighter padding to fit the larger image and 2-line title
-    flex: 1,
-    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+    paddingTop: 8,
+    paddingBottom: 12,
+    justifyContent: 'flex-start',
   },
   titleWrapper: {
     marginBottom: 0,
@@ -163,54 +103,6 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     lineHeight: 18,
     marginBottom: 0,
-  },
-  brand: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#6B7280',
-    marginTop: 2,
-  },
-  description: {
-    fontSize: 11,
-    color: '#6B7280',
-    lineHeight: 14,
-    marginVertical: 2,
-  },
-  footerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 'auto', // Pinned to bottom
-    paddingTop: 6,
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-  },
-  price: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: COLORS.primary,
-  },
-  stockIndicator: {
-    borderRadius: 8,
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    marginLeft: 4, // More spacing
-  },
-  inStock: {
-    backgroundColor: '#DEF7EC',
-  },
-  outOfStock: {
-    backgroundColor: '#FDE8E8',
-  },
-  stockText: {
-    fontSize: 10,
-    fontWeight: '600',
-  },
-  inStockText: {
-    color: '#03543F',
-  },
-  outOfStockText: {
-    color: '#9B1C1C',
   },
 });
 

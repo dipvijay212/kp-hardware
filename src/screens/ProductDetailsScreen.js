@@ -97,8 +97,6 @@ export const ProductDetailsScreen = () => {
     }
   };
 
-  const formattedPrice = Number(product.price || 0).toLocaleString('en-IN');
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={COLORS.white} barStyle="dark-content" />
@@ -113,14 +111,6 @@ export const ProductDetailsScreen = () => {
         >
           {/* Large Image Banner */}
           <View style={styles.imageContainer}>
-            {/* Skeleton/Placeholder Loader */}
-            <View style={[StyleSheet.absoluteFillObject, { justifyContent: 'center', alignItems: 'center', opacity: 0.1 }]}>
-              <Image
-                source={require('../assets/logo.png')}
-                style={{ width: 120, height: 60 }}
-                resizeMode="contain"
-              />
-            </View>
 
             {hasValidImage && (
               <Image
@@ -134,51 +124,7 @@ export const ProductDetailsScreen = () => {
 
           {/* Product Details Card Sheet */}
           <View style={styles.detailsContainer}>
-            <View style={styles.metaRow}>
-              <View style={styles.categoryBadge}>
-                <Text style={styles.categoryText}>{product.category}</Text>
-              </View>
-
-              <View style={[
-                styles.stockBadge,
-                product.stock ? styles.inStock : styles.outOfStock
-              ]}>
-                <Text style={[
-                  styles.stockText,
-                  product.stock ? styles.inStockText : styles.outOfStockText
-                ]}>
-                  {product.stock ? 'In Stock' : 'Out of Stock'}
-                </Text>
-              </View>
-            </View>
-
             <Text style={styles.name}>{product.name}</Text>
-            
-            <View style={styles.brandRow}>
-              <Text style={styles.brandLabel}>Brand:</Text>
-              <Text style={styles.brandValue}>{product.brand || 'Genuine KP Product'}</Text>
-            </View>
-
-            <View style={styles.divider} />
-
-            {/* Pricing Section */}
-            <View style={styles.priceContainer}>
-              <Text style={styles.priceLabel}>Catalog Price (Excl. Taxes)</Text>
-              <View style={styles.priceRow}>
-                <Text style={styles.priceSymbol}>₹</Text>
-                <Text style={styles.priceText}>{formattedPrice}</Text>
-              </View>
-            </View>
-
-            <View style={styles.divider} />
-
-            {/* Description Section */}
-            <View style={styles.descriptionSection}>
-              <Text style={styles.descriptionHeader}>Product Specifications</Text>
-              <Text style={styles.description}>
-                {product.description || 'This is a premium-grade hardware utility item sourced directly from authorized manufacturers. Designed for industrial longevity, heavy usage, and strict adherence to build safety guidelines.'}
-              </Text>
-            </View>
           </View>
         </ScrollView>
 
@@ -242,131 +188,26 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: width,
-    height: 240, // Reduced by 25% from 320px
-    backgroundColor: COLORS.secondary,
+    height: width, // Make it a perfect square to maximize image size
+    backgroundColor: COLORS.white,
   },
   image: {
     width: '100%',
     height: '100%',
   },
   detailsContainer: {
-    padding: 16,
-    paddingTop: 16,
+    padding: 24,
+    paddingTop: 30,
     backgroundColor: COLORS.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    marginTop: -20, // overlap image slightly more
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  categoryBadge: {
-    backgroundColor: COLORS.secondary,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: BORDER_RADIUS.sm,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    marginRight: 8,
-  },
-  categoryText: {
-    fontSize: 11,
-    fontWeight: TYPOGRAPHY.weights.semibold,
-    color: COLORS.primary,
-    textTransform: 'uppercase',
-  },
-  stockBadge: {
-    borderRadius: BORDER_RADIUS.sm,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  inStock: {
-    backgroundColor: 'rgba(0, 200, 83, 0.15)', // Accent Green with transparency
-  },
-  outOfStock: {
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
-  },
-  stockText: {
-    fontSize: 11,
-    fontWeight: TYPOGRAPHY.weights.bold,
-  },
-  inStockText: {
-    color: COLORS.accent,
-  },
-  outOfStockText: {
-    color: COLORS.danger,
+    alignItems: 'center', // Center the content horizontally
   },
   name: {
-    fontSize: 20,
+    fontSize: 28, // Increase font size to fill space
     fontWeight: TYPOGRAPHY.weights.bold,
     color: COLORS.textPrimary,
-    lineHeight: 26,
-    marginBottom: 4,
-  },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 0,
-  },
-  brandLabel: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-  },
-  brandValue: {
-    fontSize: 13,
-    fontWeight: TYPOGRAPHY.weights.semibold,
-    color: COLORS.primary,
-    marginLeft: 4,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    marginVertical: 12,
-  },
-  priceContainer: {
-    backgroundColor: COLORS.secondary,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: BORDER_RADIUS.md,
-  },
-  priceLabel: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    fontWeight: TYPOGRAPHY.weights.medium,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    marginTop: 4,
-  },
-  priceSymbol: {
-    fontSize: 20,
-    fontWeight: TYPOGRAPHY.weights.bold,
-    color: COLORS.primary,
-    marginRight: 2,
-  },
-  priceText: {
-    fontSize: 26,
-    fontWeight: TYPOGRAPHY.weights.bold,
-    color: COLORS.primary,
-  },
-  descriptionSection: {
-    marginTop: 0,
-  },
-  descriptionHeader: {
-    fontSize: 16,
-    fontWeight: TYPOGRAPHY.weights.bold,
-    color: COLORS.primary,
-    marginBottom: 8,
-  },
-  description: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    lineHeight: 22,
+    lineHeight: 36,
+    textAlign: 'center', // Center the text
+    marginBottom: 20,
   },
   // Sticky Footer styling
   stickyFooter: {
